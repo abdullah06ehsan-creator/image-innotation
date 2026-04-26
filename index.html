@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Product Photo Review Annotator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">Product Photo QA</p>
+            <h1>Review Annotator</h1>
+            <p class="status-text" id="status-text">
+              Load a product image or saved review to begin.
+            </p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="action-pill" id="upload-action" type="button">
+            <i data-lucide="upload"></i>
+            <span>Upload</span>
+          </button>
+          <button class="action-pill" id="save-action" type="button" disabled>
+            <i data-lucide="save"></i>
+            <span>Save Review</span>
+          </button>
+          <button class="action-pill" id="export-action" type="button" disabled>
+            <i data-lucide="download"></i>
+            <span>Export PNG</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="editor-panel">
+          <div class="toolbar-card">
+            <div class="tool-cluster">
+              <p class="eyebrow">Modes</p>
+              <div class="tool-row" role="toolbar" aria-label="Annotation modes">
+                <button
+                  class="icon-button tool-button"
+                  type="button"
+                  data-tool="select"
+                  data-tooltip="Select (V)"
+                  aria-label="Select tool"
+                  aria-keyshortcuts="V"
+                >
+                  <i data-lucide="mouse-pointer-2"></i>
+                </button>
+                <button
+                  class="icon-button tool-button"
+                  type="button"
+                  data-tool="pan"
+                  data-tooltip="Pan (H or Space)"
+                  aria-label="Pan tool"
+                  aria-keyshortcuts="H Space"
+                >
+                  <i data-lucide="hand"></i>
+                </button>
+                <button
+                  class="icon-button tool-button"
+                  type="button"
+                  data-tool="rect"
+                  data-tooltip="Rectangle (R)"
+                  aria-label="Rectangle annotation tool"
+                  aria-keyshortcuts="R"
+                >
+                  <i data-lucide="square"></i>
+                </button>
+                <button
+                  class="icon-button tool-button"
+                  type="button"
+                  data-tool="freehand"
+                  data-tooltip="Freehand (F)"
+                  aria-label="Freehand annotation tool"
+                  aria-keyshortcuts="F"
+                >
+                  <i data-lucide="lasso-select"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="tool-cluster">
+              <p class="eyebrow">View</p>
+              <div class="tool-row" role="toolbar" aria-label="View controls">
+                <button
+                  class="icon-button"
+                  id="zoom-out-button"
+                  type="button"
+                  data-tooltip="Zoom out (-)"
+                  aria-label="Zoom out"
+                  aria-keyshortcuts="-"
+                >
+                  <i data-lucide="zoom-out"></i>
+                </button>
+                <button
+                  class="icon-button"
+                  id="fit-button"
+                  type="button"
+                  data-tooltip="Fit to view (0)"
+                  aria-label="Fit image to view"
+                  aria-keyshortcuts="0"
+                >
+                  <i data-lucide="scan-search"></i>
+                </button>
+                <button
+                  class="icon-button"
+                  id="zoom-in-button"
+                  type="button"
+                  data-tooltip="Zoom in (+)"
+                  aria-label="Zoom in"
+                  aria-keyshortcuts="+"
+                >
+                  <i data-lucide="zoom-in"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="tool-cluster">
+              <p class="eyebrow">History</p>
+              <div class="tool-row" role="toolbar" aria-label="History controls">
+                <button
+                  class="icon-button"
+                  id="undo-button"
+                  type="button"
+                  data-tooltip="Undo (Ctrl/Cmd+Z)"
+                  aria-label="Undo"
+                  aria-keyshortcuts="Control+Z Meta+Z"
+                >
+                  <i data-lucide="undo-2"></i>
+                </button>
+                <button
+                  class="icon-button"
+                  id="redo-button"
+                  type="button"
+                  data-tooltip="Redo (Ctrl/Cmd+Shift+Z)"
+                  aria-label="Redo"
+                  aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z"
+                >
+                  <i data-lucide="redo-2"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="tool-cluster swatch-cluster">
+              <p class="eyebrow">Swatches</p>
+              <div class="swatch-strip" id="swatch-strip" aria-label="Color swatches"></div>
+            </div>
+          </div>
+
+          <div class="viewer-card">
+            <div class="viewer-meta">
+              <div>
+                <p class="eyebrow">Review Surface</p>
+                <h2 id="canvas-title">Product photo canvas</h2>
+              </div>
+              <div class="meta-pills">
+                <span class="meta-pill" id="zoom-readout">100%</span>
+                <span class="meta-pill" id="annotation-count">0 layers</span>
+              </div>
+            </div>
+
+            <div
+              class="viewer-frame"
+              id="viewer-frame"
+              tabindex="0"
+              aria-label="Image annotation canvas"
+              aria-describedby="keyboard-summary"
+            >
+              <div class="dropzone-overlay" id="dropzone-overlay">
+                <div class="dropzone-card">
+                  <p class="eyebrow">Dropzone</p>
+                  <h3>Drop a product photo or saved review JSON</h3>
+                  <p>
+                    Add JPG, PNG, WEBP, AVIF, or reload a saved review bundle to
+                    continue where you left off.
+                  </p>
+                  <button class="action-pill" id="dropzone-upload-button" type="button">
+                    <i data-lucide="folder-open"></i>
+                    <span>Choose File</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="stage" id="stage" hidden>
+                <img id="source-image" alt="Loaded product photo for annotation" />
+                <svg
+                  id="annotation-overlay"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                ></svg>
+              </div>
+            </div>
+
+            <div class="shortcut-strip" id="keyboard-summary">
+              <span><kbd>V</kbd> Select</span>
+              <span><kbd>H</kbd> or <kbd>Space</kbd> Pan</span>
+              <span><kbd>R</kbd> Rectangle</span>
+              <span><kbd>F</kbd> Freehand</span>
+              <span><kbd>Delete</kbd> Remove selected</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="panel-card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Layers</p>
+                <h2>Annotation Stack</h2>
+              </div>
+              <span class="meta-pill" id="visible-count">0 visible</span>
+            </div>
+
+            <ol class="layer-list" id="layer-list"></ol>
+            <div class="panel-empty" id="layer-empty">
+              Annotations will appear here as separate review layers.
+            </div>
+          </section>
+
+          <section class="panel-card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Inspector</p>
+                <h2>Selected Layer</h2>
+              </div>
+            </div>
+
+            <div class="panel-empty" id="inspector-empty">
+              Select a layer from the list or click a visible annotation on the
+              canvas to inspect it.
+            </div>
+
+            <div id="inspector-details" hidden>
+              <label class="field">
+                <span>Layer name</span>
+                <input
+                  id="annotation-name-input"
+                  name="annotation-name"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                />
+              </label>
+
+              <dl class="inspector-grid">
+                <div>
+                  <dt>Type</dt>
+                  <dd id="annotation-type-value">-</dd>
+                </div>
+                <div>
+                  <dt>Metrics</dt>
+                  <dd id="annotation-metrics-value">-</dd>
+                </div>
+                <div>
+                  <dt>Color</dt>
+                  <dd class="color-value">
+                    <span class="color-chip" id="annotation-color-chip"></span>
+                    <span id="annotation-color-value">-</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd id="annotation-status-value">-</dd>
+                </div>
+              </dl>
+
+              <div class="inspector-actions">
+                <button class="action-pill subtle" id="apply-swatch-button" type="button">
+                  <i data-lucide="paintbrush"></i>
+                  <span>Apply Current Swatch</span>
+                </button>
+                <button
+                  class="action-pill subtle danger"
+                  id="delete-selected-button"
+                  type="button"
+                >
+                  <i data-lucide="trash-2"></i>
+                  <span>Delete Layer</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card compact">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Keyboard</p>
+                <h2>Shortcuts</h2>
+              </div>
+            </div>
+
+            <ul class="shortcut-list">
+              <li><kbd>Ctrl/Cmd</kbd> + <kbd>Z</kbd> undo</li>
+              <li><kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> redo</li>
+              <li><kbd>+</kbd> / <kbd>-</kbd> zoom the view</li>
+              <li><kbd>0</kbd> fit the image to the canvas</li>
+              <li><kbd>Arrow keys</kbd> nudge the selected layer</li>
+              <li><kbd>Esc</kbd> cancel the active draw or drag</li>
+            </ul>
+          </section>
+        </aside>
+      </main>
+
+      <input
+        id="file-input"
+        type="file"
+        accept="image/*,.json,application/json"
+        hidden
+      />
+      <div class="sr-only" id="announcer" aria-live="polite"></div>
+    </div>
+
+    <script src="vendor/lucide.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
